@@ -28,6 +28,7 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
+  padding:20px;
 }
 .app{
   width:min(440px,95vw);
@@ -36,11 +37,16 @@ body{
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom:22px;
 }
-.logo{
-  font-weight:800;font-size:24px;
+.logo-box{display:flex;align-items:center;gap:8px;}
+.logo-icon svg{
+  height:28px;width:auto;display:block;
+  fill:url(#grad);
+}
+.logo-text{
+  font-weight:800;font-size:23px;
   background:linear-gradient(90deg,var(--accent2),var(--accent1));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  letter-spacing:-0.5px;
+  letter-spacing:-0.3px;
 }
 .connect{
   border:0;
@@ -53,9 +59,7 @@ body{
   cursor:pointer;
   transition:all .3s;
 }
-.connect:hover{
-  filter:brightness(1.15);
-}
+.connect:hover{filter:brightness(1.15);}
 .card{
   backdrop-filter:blur(var(--blur));
   background:rgba(17,23,39,0.7);
@@ -65,10 +69,7 @@ body{
   box-shadow:0 8px 40px rgba(0,0,0,.45);
   transition:all .3s;
 }
-.card:hover{
-  border-color:#263450;
-  box-shadow:0 8px 50px rgba(0,0,0,.55);
-}
+.card:hover{border-color:#263450;}
 .token-box{
   background:var(--field);
   border:1px solid var(--border);
@@ -97,11 +98,24 @@ select{
   font-weight:600;
   cursor:pointer;
 }
-.arrow{
+.swap-center{
   text-align:center;
   margin:12px 0;
-  color:var(--sub);
+}
+.swap-btn{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:1px solid #2a3349;
+  background:rgba(255,255,255,0.05);
+  color:#fff;
   font-size:18px;
+  cursor:pointer;
+  transition:all .25s;
+}
+.swap-btn:hover{
+  background:linear-gradient(90deg,var(--accent2),var(--accent1));
+  border-color:transparent;
 }
 .btn-swap{
   width:100%;
@@ -148,7 +162,21 @@ pre{
 <body>
 <div class="app">
   <div class="header">
-    <div class="logo">UNISWOP</div>
+    <div class="logo-box">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#ff4ecd;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#ff007a;stop-opacity:1"/>
+          </linearGradient></defs>
+          <path fill="url(#grad)" d="M17.6,9.5c0.6,0,1.1,0.3,1.5,0.7c0.8-0.1,1.5-0.5,2-1c-0.3,0.8-0.8,1.4-1.5,1.8
+            c0.7-0.1,1.3-0.2,1.9-0.5c-0.4,0.7-1,1.3-1.7,1.7c-1.1,0.8-2.3,1.4-3.6,1.7c-1.1,2.5-3.7,4.3-6.6,4.3c-2.5,0-4.8-1.2-6.2-3
+            c-0.1,0-0.1,0-0.2,0c-1.4,0-2.7-0.5-3.7-1.4c1.2,0.1,2.3-0.3,3.1-1C1.9,12.1,1,11,0.7,9.7c0.5,0.1,1,0.3,1.5,0.3
+            c-1-0.7-1.7-1.8-1.7-3c0.3,0.2,0.6,0.3,1,0.5c1,0.6,2.1,1,3.3,1.2C5.5,7.2,8.1,5.6,11,5.6C14.7,5.6,17.6,7.5,17.6,9.5z"/>
+        </svg>
+      </div>
+      <div class="logo-text">UNISWOP</div>
+    </div>
     <button id="btnConnect" class="connect">Connect Wallet</button>
   </div>
 
@@ -157,11 +185,16 @@ pre{
       <select id="tokenA"></select>
       <input id="amtA" placeholder="0.0" inputmode="decimal" />
     </div>
-    <div class="arrow">↓</div>
+
+    <div class="swap-center">
+      <button id="flipBtn" class="swap-btn">⇅</button>
+    </div>
+
     <div class="token-box">
       <select id="tokenB"></select>
       <input id="amtB" placeholder="0.0" disabled />
     </div>
+
     <button id="btnSwap" class="btn-swap">Swap</button>
     <div class="rate" id="rateText">1 ETH ≈ 2000 USDC</div>
     <pre id="log">log siap...</pre>
@@ -181,7 +214,6 @@ const DEMO_RATES={
   "WETH/USDC":2000,"USDC/WETH":1/2000,
   "ETH/WETH":1,"WETH/ETH":1
 };
-const ERC20_ABI=["function balanceOf(address) view returns (uint256)"];
 const $=id=>document.getElementById(id);
 const log=m=>{$("log").textContent+=( $("log").textContent?"\n":"")+m;};
 let provider,signer,me;
@@ -215,10 +247,18 @@ function estimate(){
   $("amtB").value=out.toFixed(tb.dec>6?6:tb.dec);
   $("rateText").textContent=`1 ${ta.sym} ≈ ${(out/amt).toFixed(4)} ${tb.sym}`;
 }
+function flipTokens(){
+  const a=$("tokenA"),b=$("tokenB");
+  const tmp=a.value;a.value=b.value;b.value=tmp;
+  const amtA=$("amtA"),amtB=$("amtB");
+  const tmpv=amtA.value;amtA.value=amtB.value;amtB.value=tmpv;
+  estimate();
+}
 $("btnConnect").onclick=connect;
 $("tokenA").onchange=estimate;
 $("tokenB").onchange=estimate;
 $("amtA").oninput=estimate;
+$("flipBtn").onclick=flipTokens;
 $("btnSwap").onclick=()=>log("💡 Simulasi swap — belum kirim transaksi");
 initTokens();
 </script>
