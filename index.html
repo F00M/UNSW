@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>UNISWOP • Sepolia Testnet (Simulasi)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0b0f14; --card:#0f1520; --mut:#1e293b;
+  --grad1:#ff4ecd; --grad2:#ff007a;
+  --txt:#e6edf3; --sub:#a7b2c3; --field:#0e1422; --edge:#223148;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 20% -10%,#1b2230,#0b0f14);
+     color:var(--txt);font-family:Inter,system-ui,Arial;display:flex;justify-content:center;padding:32px}
+.wrap{width:min(460px,94vw)}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.brand{font-weight:800;font-size:20px;background:linear-gradient(90deg,var(--grad1),var(--grad2));
+       -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.badge{font-size:12px;background:#162033;border:1px solid #263652;color:#9fb0d9;
+       border-radius:999px;padding:6px 10px;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--mut);border-radius:16px;
+      padding:16px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.row{display:flex;gap:10px;align-items:center}
+.sel,.inp{flex:1;border:1px solid var(--edge);background:var(--field);border-radius:12px;
+          padding:12px;color:#fff}
+.sel{cursor:pointer}
+.inp{font-size:18px}
+.arrow{display:flex;justify-content:center;margin:8px 0;color:#9fb0d9}
+.btn{width:100%;padding:12px;border:0;border-radius:12px;margin-top:12px;font-weight:700;cursor:pointer;
+     background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#051018}
+.kv{display:flex;justify-content:space-between;color:#9fb0d9;font-size:12px;margin-top:8px}
+.hr{height:1px;border:0;background:#203040;margin:12px 0}
+pre{white-space:pre-wrap;background:var(--field);border:1px solid var(--edge);border-radius:12px;
+    padding:12px;margin-top:12px;font-size:12px;color:#cfe3ff;max-height:220px;overflow:auto}
+.notice{margin-top:10px;font-size:12px;color:#ff9ec7}
+.footer{margin-top:10px;text-align:center;color:#9fb0d9;font-size:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">UNISWOP</div>
+    <div class="row">
+      <button id="btnConnect" class="badge">MetaMask</button>
+      <span id="chain" class="badge">Chain: -</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="kv"><span>Mode</span><span id="modeTag">Simulasi (tanpa router)</span></div>
+
+    <div class="row" style="margin-top:8px">
+      <select id="tokenA" class="sel"></select>
+      <input id="amtA" class="inp" placeholder="0.0" inputmode="decimal"/>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="row">
+      <select id="tokenB" class="sel"></select>
+      <input id="amtB" class="inp" placeholder="0.0" disabled/>
+    </div>
+
+    <div class="kv"><span>Estimasi harga</span><span id="priceHint">-</span></div>
+    <button id="btnSwap" class="btn">Swap</button>
+
+    <div class="hr"></div>
+    <div class="kv"><span>Saldo</span><span id="balances">-</span></div>
+    <div class="notice">Simulasi — belum eksekusi kontrak. Hanya perhitungan lokal.</div>
+    <pre id="log">log siap...</pre>
+  </div>
+  <div class="footer">by thdx</div>
+</div>
+
+<script>
+/* ============ KONFIGURASI ============ */
+const TOKENS = [
+  { sym:"ETH",  addr:"ETH_NATIVE", dec:18 },
+  { sym:"WETH", addr:"0xfff9976782d46cc05630d1f6ebab18b2324d6b14", dec:18 },
+  { sym:"USDC", addr:"0x1c7d4b196cb0c7b01d743fbc6116a902379c7238", dec:6  },
+];
+
+const DEMO_RATES = {
+  "WETH/USDC": 2000, "USDC/WETH": 1/2000,
+  "ETH/USDC": 2000, "USDC/ETH": 1/2000,
+  "ETH/WETH": 1, "WETH/ETH": 1
+};
+
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)"
+];
+
+const $=id=>document.getElementById(id);
+const log=(m)=>{const el=$("log");el.textContent+=(el.textContent?"\n":"")+m;el.scrollTop=el.scrollHeight;console.log(m);};
+
+let provider,signer,me,net;
+
+function initSelectors(){
+  const a=$("tokenA"),b=$("tokenB");
+  a.innerHTML=b.innerHTML="";
+  TOKENS.forEach((t,i)=>{
+    const o1=document.createElement("option");o1.value=i;o1.textContent=t.sym;a.appendChild(o1);
+    const o2=document.createElement("option");o2.value=i;o2.textContent=t.sym;b.appendChild(o2);
+  });
+  a.value=TOKENS.findIndex(t=>t.sym==="ETH");
+  b.value=TOKENS.findIndex(t=>t.sym==="USDC");
+}
+
+async function connect(){
+  try{
+    if(!window.ethereum)throw new Error("MetaMask tidak tersedia");
+    provider=new ethers.providers.Web3Provider(window.ethereum,"any");
+    await provider.send("eth_requestAccounts",[]);
+    signer=provider.getSigner();
+    me=await signer.getAddress();
+    net=await provider.getNetwork();
+    $("chain").textContent="Chain: "+net.chainId;
+    log(`✅ Connected: ${me}\nChain: ${net.chainId}`);
+    refreshBalances();
+  }catch(e){log("❌ Connect error: "+(e.message||e));}
+}
+
+function estimateSim(){
+  const ia=+$("tokenA").value,ib=+$("tokenB").value;
+  if(ia===ib){$("amtB").value="";$("priceHint").textContent="-";return;}
+  const tA=TOKENS[ia],tB=TOKENS[ib];
+  const amt=parseFloat($("amtA").value)||0;
+  const rate=DEMO_RATES[`${tA.sym}/${tB.sym}`];
+  if(!rate){$("amtB").value="";$("priceHint").textContent="tidak ada data";return;}
+  const out=amt*rate;
+  $("amtB").value=out?out.toFixed(tB.dec>6?6:tB.dec):"";
+  $("priceHint").textContent=`≈ ${(out/amt).toFixed(4)} ${tB.sym}/${tA.sym}`;
+}
+
+async function readBalance(token){
+  if(!provider||!me)return null;
+  try{
+    if(token.addr==="ETH_NATIVE"){
+      const wei=await provider.getBalance(me);
+      return ethers.utils.formatUnits(wei,token.dec);
+    }else{
+      const c=new ethers.Contract(token.addr,ERC20_ABI,provider);
+      const bal=await c.balanceOf(me);
+      return ethers.utils.formatUnits(bal,token.dec);
+    }
+  }catch{return null;}
+}
+
+async function refreshBalances(){
+  const ia=+$("tokenA").value,ib=+$("tokenB").value;
+  const [ba,bb]=await Promise.all([readBalance(TOKENS[ia]),readBalance(TOKENS[ib])]);
+  $("balances").textContent=`${TOKENS[ia].sym}: ${ba??"-"} · ${TOKENS[ib].sym}: ${bb??"-"}`;
+}
+
+initSelectors();
+$("btnConnect").onclick=connect;
+$("tokenA").onchange=()=>{estimateSim();refreshBalances();};
+$("tokenB").onchange=()=>{estimateSim();refreshBalances();};
+$("amtA").oninput=()=>estimateSim();
+$("btnSwap").onclick=()=>log("💡 Simulasi swap — belum kirim transaksi");
+</script>
+</body>
+</html>
