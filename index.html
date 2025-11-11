@@ -8,441 +8,348 @@
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <style>
 :root{
-  --bg:#0b0e17; --panel:#11162a; --b:#202a40; --txt:#f7f7fb; --sub:#9aa3b2;
-  --p1:#ff4ecd; --p2:#ff007a; --chip:#1a2035; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
+  --bg:#0b0e17; --grad1:#1a1230; --panel:#0e1426; --border:#1e2740;
+  --chip:#121a2f; --chip2:#0b1124; --txt:#f7f7fb; --mut:#9aa3b2;
+  --p1:#ff4ecd; --p2:#ff007a;
 }
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 30% -20%,#1a1230 0%,#0b0e17 60%);color:var(--txt);
-  font-family:Inter,system-ui,Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
-.header{max-width:980px;margin:0 auto;padding:16px 16px 0;display:flex;align-items:center;gap:12px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
-.uni{width:26px;height:26px;display:block;background:linear-gradient(90deg,var(--p1),var(--p2));
-  -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M410 182c-9-57-59-101-119-101-66 0-120 54-120 120 0 3 0 7 1 10C118 223 80 269 80 324c0 65 53 118 118 118 57 0 106-41 116-95 55-11 98-60 98-118 0-26-8-50-22-69z"/></svg>') center/contain no-repeat}
+html,body{height:100%}
+body{
+  margin:0; color:var(--txt); font-family:Inter,system-ui,sans-serif;
+  background: radial-gradient(circle at 30% -20%, var(--grad1) 0%, var(--bg) 60%);
+  display:flex; flex-direction:column;
+}
+/* Header */
+.header{max-width:980px;margin:0 auto;padding:14px 16px 0;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px}
+.brand svg{width:26px;height:26px}
 .tabs{display:flex;gap:8px;margin-left:6px}
 .tab{padding:8px 12px;border-radius:10px;background:transparent;color:#cbd5e1;border:1px solid transparent;cursor:pointer}
-.tab.active{border:1px solid #2a3550;background:#121a2f;color:#fff}
+.tab.active{border:1px solid var(--border);background:#121a2f;color:#fff}
 .grow{flex:1}
 .right{display:flex;align-items:center;gap:10px}
-.chip{background:var(--chip);border:1px solid var(--b);padding:8px 10px;border-radius:12px;color:#d8def0;font-size:12px}
+.chip{background:#101834;border:1px solid var(--border);padding:8px 10px;border-radius:12px;color:#d8def0;font-size:12px}
 .btn{border:0;border-radius:12px;padding:9px 14px;background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:700;cursor:pointer}
-.iconbtn{border:1px solid var(--b);background:#12182c;color:#d4d7e6;border-radius:12px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer}
-.main{flex:1;display:grid;place-items:center;padding:18px}
-.card{width:min(520px,94vw);background:#0e1426;border:1px solid var(--b);border-radius:16px;padding:16px;box-shadow:0 10px 32px rgba(0,0,0,.35)}
-.nav{display:flex;gap:8px;margin-bottom:12px}
-.nav button{flex:0 0 auto}
-.panel{background:#0a1020;border:1px solid var(--b);border-radius:16px;padding:14px}
+
+/* Main Card */
+.main{flex:1;display:flex;justify-content:center;align-items:center;padding:16px}
+.card{
+  width:100%; max-width:520px; background:var(--panel);
+  border:1px solid var(--border); border-radius:16px; padding:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.35); margin:0 auto;
+}
+.panel{background:#0a1020;border:1px solid var(--border);border-radius:16px;padding:14px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border-radius:12px;background:#0b1124;border:1px solid #1c2742}
-.token{display:flex;align-items:center;gap:8px}
-.tkbtn{display:flex;align-items:center;gap:8px;border:1px solid #283455;background:#121a30;border-radius:12px;padding:8px 10px;cursor:pointer;color:#fff;font-weight:700}
+.tkbtn{display:flex;align-items:center;gap:8px;border:1px solid #283455;background:#121a30;border-radius:12px;padding:8px 10px;cursor:pointer;color:#fff;font-weight:700;min-width:112px;justify-content:center}
 .sym{background:#1b2542;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;font-size:11px}
 .inp{flex:1;text-align:right;background:transparent;border:0;color:#fff;font-size:22px;font-weight:700;outline:none}
-.small{font-size:12px;color:var(--sub);margin:6px 2px}
-.hr{height:1px;background:#1f2a48;margin:12px 0;border-radius:2px}
-.btnxl{width:100%;padding:14px;border-radius:14px;border:0;background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:800;cursor:pointer}
-.kv{display:flex;justify-content:space-between;font-size:12px;color:#aeb9d0}
-.warn{color:var(--warn)}.err{color:var(--err)}.ok{color:var(--ok)}
-pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px;padding:10px;font-size:12px;max-height:160px;overflow:auto}
+.info{display:flex;justify-content:space-between;font-size:12px;color:#aeb9d0;margin-top:6px}
+.centerbtn{display:flex;justify-content:center;align-items:center;margin:-6px 0 2px}
+.centerbtn button{background:#18203a;border:1px solid #283455;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer}
+.btnxl{width:100%;padding:14px;border-radius:14px;border:0;background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:800;cursor:pointer;margin-top:10px}
 
-/* modal */
-.modal{position:fixed;inset:0;background:rgba(7,10,20,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
-.mcard{width:min(520px,94vw);background:#0e1426;border:1px solid #263154;border-radius:16px;padding:14px}
-.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.x{border:1px solid #2a3555;background:#121a2f;color:#e5e7ef;border-radius:10px;width:36px;height:36px;cursor:pointer}
-.search{display:flex;gap:8px;margin:10px 0}
-.search input{flex:1;background:#0b1124;border:1px solid #1c2742;border-radius:10px;padding:10px;color:#e9ecf6}
-.tlist{display:grid;gap:6px;max-height:260px;overflow:auto;margin:8px 0}
-.tItem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:12px;background:#0b1124;border:1px solid #1c2742;cursor:pointer}
-.badge{font-size:11px;color:#9fb0d9}
+/* Token modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:12px;z-index:1000}
+.sheet{width:min(420px,92vw);background:#0b1120;border:1px solid var(--border);border-radius:16px;padding:14px}
+.sheet h4{margin:0 0 8px}
+.search{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0a0f1e;color:#fff}
+.list{margin-top:10px;display:grid;gap:8px;max-height:300px;overflow:auto}
+.item{display:flex;align-items:center;gap:10px;border:1px solid #253152;background:#101834;border-radius:12px;padding:10px;cursor:pointer}
+.item .sym{width:26px;height:26px}
+pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px;padding:10px;font-size:12px;max-height:150px;overflow:auto;margin-top:10px}
 
-.hide{display:none}
+/* Mobile fit */
+@media (max-width:520px){
+  .header{padding:10px 12px}
+  .brand{font-size:16px}
+  .btn{padding:8px 12px;font-size:13px}
+}
 </style>
 </head>
 <body>
+  <!-- Header -->
   <div class="header">
-    <div class="brand"><div class="uni"></div> UNISWOP</div>
-    <div class="tabs">
-      <button id="tabSwap" class="tab active">Swap</button>
-      <button id="tabPool" class="tab">Pool</button>
+    <div class="brand" title="Uniswop">
+      <!-- unicorn inline svg -->
+      <svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff4ecd"/><stop offset="1" stop-color="#ff007a"/></linearGradient></defs><path fill="url(#g)" d="M410 182c-9-57-59-101-119-101-66 0-120 54-120 120 0 3 0 7 1 10C118 223 80 269 80 324c0 65 53 118 118 118 57 0 106-41 116-95 55-11 98-60 98-118 0-26-8-50-22-69z"/></svg>
+      UNISWOP
     </div>
+    <div class="tabs"><button class="tab active">Swap</button></div>
     <div class="grow"></div>
     <div class="chip" id="netChip">Sepolia</div>
-    <button id="btnSettings" class="iconbtn" title="Settings">
-      <!-- sliders icon -->
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h10M4 17h16M14 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm6 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
     <button id="btnConnect" class="btn">Connect</button>
   </div>
 
+  <!-- Main -->
   <div class="main">
     <div class="card">
-      <div class="nav">
-        <button id="btnSwapTab" class="tab active">Swap</button>
-        <button id="btnPoolTab" class="tab">Add Liquidity</button>
+      <div class="panel">
+        <!-- FROM -->
+        <div class="row">
+          <button id="fromBtn" class="tkbtn"><span class="sym">E</span><span id="fromSym">ETH</span></button>
+          <input id="fromAmt" class="inp" placeholder="0.0" inputmode="decimal"/>
+        </div>
+        <div class="info"><span id="fromBal">Balance: -</span><span id="estTxt">Estimasi: -</span></div>
+
+        <!-- middle flip -->
+        <div class="centerbtn">
+          <button id="flipBtn" title="Tukar posisi">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 9h16M10 5l-6 4 6 4M20 15H4M14 19l6-4-6-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <!-- TO -->
+        <div class="row">
+          <button id="toBtn" class="tkbtn"><span class="sym">U</span><span id="toSym">USDC</span></button>
+          <input id="toAmt" class="inp" placeholder="0.0" disabled/>
+        </div>
+        <div class="info"><span id="toBal">Balance: -</span><span id="routerName">Router: auto</span></div>
+
+        <button id="swapBtn" class="btnxl">Swap</button>
       </div>
-
-      <!-- SWAP PANEL -->
-      <div id="swapPanel" class="panel">
-        <div class="row">
-          <div class="token">
-            <button class="tkbtn" id="btnFrom">
-              <span class="sym" id="fromIcon">E</span><span id="fromSym">ETH</span>
-            </button>
-          </div>
-          <input id="fromVal" class="inp" placeholder="0.0" inputmode="decimal"/>
-        </div>
-        <div class="kv"><span id="fromBal" class="small">Balance -</span><span id="rateLine" class="small">Estimasi -</span></div>
-        <div class="hr"></div>
-        <div class="row">
-          <div class="token">
-            <button class="tkbtn" id="btnTo">
-              <span class="sym" id="toIcon">U</span><span id="toSym">USDC</span>
-            </button>
-          </div>
-          <input id="toVal" class="inp" placeholder="0.0" disabled/>
-        </div>
-        <div class="kv"><span id="toBal" class="small">Balance -</span><span class="small" id="slipInfo">Slippage: <b id="slipView">0.5%</b></span></div>
-
-        <div class="hr"></div>
-        <button id="btnSwap" class="btnxl">Swap</button>
-        <div class="kv" style="margin-top:8px">
-          <span id="routerUsed" class="badge">Router: auto</span>
-          <span id="deadlineView" class="badge">TTL: 20m</span>
-        </div>
-      </div>
-
-      <!-- POOL PANEL -->
-      <div id="poolPanel" class="panel hide">
-        <div class="row">
-          <div class="token"><button class="tkbtn" id="btnPA"><span class="sym" id="paI">E</span><span id="paS">ETH</span></button></div>
-          <input id="paV" class="inp" placeholder="0.0" inputmode="decimal"/>
-        </div>
-        <div class="small" id="paBal">Balance -</div>
-        <div class="hr"></div>
-        <div class="row">
-          <div class="token"><button class="tkbtn" id="btnPB"><span class="sym" id="pbI">U</span><span id="pbS">USDC</span></button></div>
-          <input id="pbV" class="inp" placeholder="0.0" inputmode="decimal"/>
-        </div>
-        <div class="small" id="pbBal">Balance -</div>
-        <div class="hr"></div>
-        <button id="btnAddLiq" class="btnxl">Add Liquidity</button>
-      </div>
-
-      <div class="hr"></div>
-      <pre id="log">log siap…</pre>
+      <pre id="log">log siap...</pre>
     </div>
   </div>
 
-  <!-- TOKEN MODAL -->
-  <div id="tkModal" class="modal">
-    <div class="mcard">
-      <div class="mhead">
-        <div style="font-weight:800">Select a token</div>
-        <button class="x" id="tkClose">✕</button>
-      </div>
-      <div class="search">
-        <input id="tkSearch" placeholder="Search name or paste address (0x…)"/>
-        <button class="btn" id="tkAdd">Import</button>
-      </div>
-      <div class="tlist" id="tkList"></div>
-    </div>
-  </div>
-
-  <!-- SETTINGS MODAL -->
-  <div id="setModal" class="modal">
-    <div class="mcard">
-      <div class="mhead">
-        <div style="font-weight:800">Settings</div>
-        <button class="x" id="setClose">✕</button>
-      </div>
-      <div class="search">
-        <input id="slip" placeholder="Slippage % (ex: 0.5)" />
-        <input id="ttl"  placeholder="Deadline menit (ex: 20)" />
-        <button class="btn" id="applySet">Apply</button>
-      </div>
-      <div class="small">Tip: slippage terlalu kecil bisa bikin gagal saat harga bergerak.</div>
+  <!-- Token Modal -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <h4>Pilih Token</h4>
+      <input id="q" class="search" placeholder="Cari simbol / alamat (0x...)"/>
+      <div id="list" class="list"></div>
     </div>
   </div>
 
 <script>
-/* ========= CONFIG ========= */
-const CHAIN = { id:11155111, hex:"0xaa36a7", name:"Sepolia", exp:"https://sepolia.etherscan.io" };
+/** ========= Config ========= **/
+const CHAIN = { id:11155111, name:"Sepolia" };
+const TOKENS = {
+  ETH:  { symbol:"ETH",  addr:"ETH",        dec:18 },
+  WETH: { symbol:"WETH", addr:"0xfff9976782d46cc05630d1f6ebab18b2324d6b14", dec:18 },
+  USDC: { symbol:"USDC", addr:"0x1c7d4b196cb0c7b01d743fbc6116a902379c7238", dec:6 },
+};
+// Routers: primary + fallback
 const ROUTERS = [
-  "0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3", // V2Router02
-  "0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b"  // alt
+  { name:"RouterV2", addr:"0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3" },
+  { name:"RouterAlt", addr:"0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b" },
 ];
-const TOKENS_INIT = [
-  { sym:"ETH",  addr:"ETH_NATIVE", dec:18, icon:"E" },
-  { sym:"WETH", addr:"0xfff9976782d46cc05630d1f6ebab18b2324d6b14", dec:18, icon:"W" },
-  { sym:"USDC", addr:"0x1c7d4b196cb0c7b01d743fbc6116a902379c7238", dec:6,  icon:"U" }
-];
-const ABI_ERC20 = [
-  "function symbol() view returns (string)",
-  "function decimals() view returns (uint8)",
+const ERC20_ABI=[
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address,address) view returns (uint256)",
-  "function approve(address,uint256) returns (bool)"
+  "function approve(address,uint256) returns (bool)",
+  "function decimals() view returns (uint8)"
 ];
-const ABI_ROUTER = [
-  "function getAmountsOut(uint256,address[]) view returns(uint256[])",
-  "function swapExactTokensForTokens(uint256,uint256,address[],address,uint256) returns (uint256[])",
+const WETH_ABI=[
+  "function deposit() payable",
+  "function withdraw(uint256)",
+  "function balanceOf(address) view returns (uint256)"
+];
+const ROUTER_ABI=[
+  "function getAmountsOut(uint256,address[]) view returns (uint256[])",
   "function swapExactETHForTokens(uint256,address[],address,uint256) payable returns (uint256[])",
-  "function swapExactTokensForETH(uint256,uint256,address[],address,uint256) returns (uint256[])"
+  "function swapExactTokensForETH(uint256,address[],address,uint256) returns (uint256[])",
+  "function swapExactTokensForTokens(uint256,address[],address,uint256) returns (uint256[])"
 ];
-const ABI_WETH = ["function deposit() payable","function withdraw(uint256)"];
 
-/* ========= STATE ========= */
-let TOK = [...TOKENS_INIT];
-let P,S,ME;
-let from = TOK[0], to = TOK[2]; // default ETH -> USDC
-let poolA = TOK[0], poolB = TOK[2];
-let activePicker = null; // 'from' | 'to' | 'pa' | 'pb'
-let SLIPPAGE = 0.5, TTL_MIN = 20;
+const $=id=>document.getElementById(id);
+const log = (m)=>{ const el=$("log"); el.textContent+=(el.textContent?"\n":"")+m; el.scrollTop=el.scrollHeight; console.log(m); };
 
-/* ========= DOM helpers ========= */
-const $ = id => document.getElementById(id);
-const log = m => { const el=$("log"); el.textContent += (el.textContent? "\n":"")+m; el.scrollTop=el.scrollHeight; console.log(m); };
-const fmt = (n, d=6) => Number(n).toFixed(d);
-const parseNum = v => (v||"").replace(/,/g,"");
+let provider, signer, me;
+let from=TOKENS.ETH, to=TOKENS.USDC;
+let whichSelecting="from";
 
-/* ========= Provider / Wallet ========= */
-async function ensureProv(){
-  if(!window.ethereum) throw new Error("Install MetaMask");
-  if(!P) P = new ethers.providers.Web3Provider(window.ethereum,"any");
-  return P;
-}
+/** ========= Wallet ========= **/
 async function connect(){
   try{
-    await ensureProv();
-    await P.send("eth_requestAccounts",[]);
-    S = P.getSigner(); ME = await S.getAddress();
-    const net = await P.getNetwork();
-    if(net.chainId !== CHAIN.id){
-      await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{chainId:CHAIN.hex}] });
+    if(!window.ethereum) throw new Error("Install MetaMask dulu");
+    provider=new ethers.providers.Web3Provider(window.ethereum,"any");
+    await provider.send("eth_requestAccounts",[]);
+    signer=provider.getSigner(); me=await signer.getAddress();
+    const net=await provider.getNetwork();
+    if (net.chainId!==CHAIN.id){
+      await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:"0xaa36a7"}]}); // Sepolia
     }
-    $("btnConnect").textContent = ME.slice(0,6)+"…"+ME.slice(-4);
-    $("netChip").textContent = CHAIN.name;
+    $("netChip").textContent=CHAIN.name;
+    log(`✅ Connected: ${me} • Chain: ${CHAIN.id}`);
     refreshBalances();
-    estimate();
-    log("✅ Connected");
   }catch(e){ log("❌ Connect error: "+(e.message||e)); }
 }
-$("btnConnect").onclick = connect;
 
-/* ========= Token List Modal ========= */
-function openTkModal(which){
-  activePicker = which;
-  $("tkModal").style.display="flex";
-  $("tkSearch").value="";
-  renderTkList(TOK);
-}
-function closeTkModal(){ $("tkModal").style.display="none"; }
-$("tkClose").onclick = closeTkModal;
+/** ========= UI helpers ========= **/
+function format(n,dec=6){ try{ return Number(n).toLocaleString(undefined,{maximumFractionDigits:dec}); }catch{return n} }
+function isETH(token){ return token.addr==="ETH"; }
+function addrOrWETH(token){ return isETH(token)? TOKENS.WETH.addr : token.addr; }
 
-function renderTkList(list){
-  const box = $("tkList"); box.innerHTML="";
-  list.forEach(t=>{
-    const el = document.createElement("div");
-    el.className="tItem";
-    el.innerHTML = `<div style="display:flex;align-items:center;gap:10px">
-      <div class="sym">${t.icon||t.sym[0]}</div>
-      <div><div style="font-weight:700">${t.sym}</div><div class="badge" title="${t.addr}">${t.addr==="ETH_NATIVE"?"Native":t.addr.slice(0,10)+"…"+t.addr.slice(-6)}</div></div>
-    </div><div class="badge">${t.dec}</div>`;
-    el.onclick = ()=>selectToken(t);
-    box.appendChild(el);
+/** ========= Modal ========= **/
+function openModal(which){
+  whichSelecting=which;
+  const L=$("list"); L.innerHTML="";
+  Object.values(TOKENS).forEach(t=>{
+    const item=document.createElement("div");
+    item.className="item";
+    item.innerHTML=`<span class="sym">${t.symbol[0]}</span><div><div style="font-weight:700">${t.symbol}</div><div style="font-size:12px;color:#9fb0ff">${t.addr==='ETH'?'Native ETH':t.addr}</div></div>`;
+    item.onclick=()=>{ selectToken(t); };
+    L.appendChild(item);
   });
+  $("modal").style.display="flex";
 }
-$("tkSearch").oninput = ()=>{
-  const q = $("tkSearch").value.trim().toLowerCase();
-  const res = TOK.filter(t=> t.sym.toLowerCase().includes(q) || t.addr.toLowerCase().includes(q));
-  renderTkList(res);
-};
-$("tkAdd").onclick = async ()=>{
-  try{
-    const v = $("tkSearch").value.trim();
-    if(!/^0x[0-9a-fA-F]{40}$/.test(v)) return log("⚠️ Paste address token valid (0x..40hex).");
-    await ensureProv();
-    const c = new ethers.Contract(v, ABI_ERC20, P);
-    let sym="TKN", dec=18;
-    try{ sym = await c.symbol(); dec = await c.decimals(); }catch{}
-    const t = { sym, addr:v, dec:Number(dec), icon: sym[0]||"T" };
-    if(!TOK.find(x=>x.addr.toLowerCase()===v.toLowerCase())) TOK.push(t);
-    renderTkList(TOK);
-    log(`✅ Imported ${sym}`);
-  }catch(e){ log("❌ Import error: "+(e.message||e)); }
-};
-
+function closeModal(){ $("modal").style.display="none"; }
 function selectToken(t){
-  if(activePicker==="from"){ from=t; $("fromSym").textContent=t.sym; $("fromIcon").textContent=t.icon||t.sym[0]; }
-  if(activePicker==="to"){ to=t; $("toSym").textContent=t.sym; $("toIcon").textContent=t.icon||t.sym[0]; }
-  if(activePicker==="pa"){ poolA=t; $("paS").textContent=t.sym; $("paI").textContent=t.icon||t.sym[0]; }
-  if(activePicker==="pb"){ poolB=t; $("pbS").textContent=t.sym; $("pbI").textContent=t.icon||t.sym[0]; }
-  closeTkModal(); refreshBalances(); estimate();
+  if(whichSelecting==="from"){
+    from=t; $("fromSym").textContent=t.symbol;
+  }else{
+    to=t; $("toSym").textContent=t.symbol;
+  }
+  closeModal();
+  refreshBalances();
+  estimate(); // refresh est
 }
 
-/* ========= UI Bind (open pickers) ========= */
-$("btnFrom").onclick = ()=>openTkModal("from");
-$("btnTo").onclick   = ()=>openTkModal("to");
-$("btnPA").onclick   = ()=>openTkModal("pa");
-$("btnPB").onclick   = ()=>openTkModal("pb");
-
-/* ========= Settings ========= */
-$("btnSettings").onclick = ()=>{ $("setModal").style.display="flex"; $("slip").value=String(SLIPPAGE); $("ttl").value=String(TTL_MIN); };
-$("setClose").onclick = ()=>{ $("setModal").style.display="none"; };
-$("applySet").onclick = ()=>{
-  const s = Number($("slip").value||"0.5");
-  const t = Number($("ttl").value||"20");
-  if(!(s>=0 && s<=50)) return log("⚠️ Slippage tidak wajar.");
-  if(!(t>=1 && t<=120)) return log("⚠️ TTL 1–120 menit.");
-  SLIPPAGE=s; TTL_MIN=t;
-  $("slipView").textContent = SLIPPAGE+"%";
-  $("deadlineView").textContent = "TTL: "+TTL_MIN+"m";
-  $("setModal").style.display="none";
-};
-
-/* ========= Helpers ========= */
-function toPath(a,b){
-  const W = TOK.find(x=>x.sym==="WETH").addr;
-  const A = a.addr==="ETH_NATIVE" ? W : a.addr;
-  const B = b.addr==="ETH_NATIVE" ? W : b.addr;
-  return [A,B];
-}
-function parseUnitsSafe(v,dec){ return ethers.utils.parseUnits(parseNum(v||"0")||"0", dec); }
-
-/* ========= Balances ========= */
-async function readBal(t){
-  if(!ME || !P) return "-";
-  if(t.addr==="ETH_NATIVE"){ const b = await P.getBalance(ME); return ethers.utils.formatUnits(b,t.dec); }
-  const c = new ethers.Contract(t.addr, ABI_ERC20, P);
-  const b = await c.balanceOf(ME); return ethers.utils.formatUnits(b,t.dec);
-}
+/** ========= Balances ========= **/
 async function refreshBalances(){
+  if(!provider || !me) return;
   try{
-    $("fromBal").textContent = "Balance -";
-    $("toBal").textContent   = "Balance -";
-    if(!P) return;
-    const [bf, bt] = await Promise.all([readBal(from), readBal(to)]);
-    $("fromBal").textContent = `Balance ${from.sym}: ${fmt(bf,4)}`;
-    $("toBal").textContent   = `Balance ${to.sym}: ${fmt(bt,4)}`;
-    // pool page
-    $("paBal").textContent = `Balance ${poolA.sym}: ${fmt(await readBal(poolA),4)}`;
-    $("pbBal").textContent = `Balance ${poolB.sym}: ${fmt(await readBal(poolB),4)}`;
-  }catch{}
+    // from balance
+    if(isETH(from)){
+      const bal = await provider.getBalance(me);
+      $("fromBal").textContent = "Balance: "+format(ethers.utils.formatEther(bal),4);
+    }else{
+      const c=new ethers.Contract(from.addr, ERC20_ABI, provider);
+      const bal=await c.balanceOf(me);
+      $("fromBal").textContent = "Balance: "+format(ethers.utils.formatUnits(bal, from.dec),4);
+    }
+    // to balance (info)
+    if(isETH(to)){
+      const bal = await provider.getBalance(me);
+      $("toBal").textContent = "Balance: "+format(ethers.utils.formatEther(bal),4);
+    }else{
+      const c=new ethers.Contract(to.addr, ERC20_ABI, provider);
+      const bal=await c.balanceOf(me);
+      $("toBal").textContent = "Balance: "+format(ethers.utils.formatUnits(bal, to.dec),4);
+    }
+  }catch(e){
+    $("fromBal").textContent="Balance: -"; $("toBal").textContent="Balance: -";
+  }
 }
 
-/* ========= Estimate ========= */
+/** ========= Estimation ========= **/
 async function estimate(){
   try{
-    if(!P) return;
-    const v = parseNum($("fromVal").value);
-    if(!v || Number(v)<=0 || from.addr===to.addr){ $("toVal").value=""; $("rateLine").textContent="Estimasi -"; return; }
-    const amtIn = parseUnitsSafe(v, from.dec);
-    let used = "";
-    for(const R of ROUTERS){
+    if(!provider) return;
+    const v=$("fromAmt").value.trim();
+    if(!v || Number(v)<=0){ $("toAmt").value=""; $("estTxt").textContent="Estimasi: -"; return; }
+    const amtIn = isETH(from)
+      ? ethers.utils.parseUnits(v, 18)
+      : ethers.utils.parseUnits(v, from.dec);
+
+    const path = [ addrOrWETH(from), addrOrWETH(to) ];
+    // try routers
+    for (const r of ROUTERS){
       try{
-        const r = new ethers.Contract(R, ABI_ROUTER, P);
-        const out = await r.getAmountsOut(amtIn, toPath(from,to));
-        const amtOut = out[out.length-1];
-        const val = Number(ethers.utils.formatUnits(amtOut, to.dec));
-        $("toVal").value = fmt(val,6);
-        $("rateLine").textContent = `1 ${from.sym} ≈ ${fmt(val/Number(v),6)} ${to.sym}`;
-        $("routerUsed").textContent = "Router: "+R.slice(0,6)+"…"+R.slice(-4);
-        used = R; break;
-      }catch{}
-    }
-    if(!used){ $("toVal").value=""; $("rateLine").textContent="Estimasi gagal (no liquidity)"; $("routerUsed").textContent="Router: auto"; }
-  }catch{ $("toVal").value=""; $("rateLine").textContent="Estimasi gagal"; }
-}
-$("fromVal").oninput = ()=>{ $("fromVal").value = parseNum($("fromVal").value); estimate(); };
-
-/* ========= Swap ========= */
-async function ensureAllow(token, amount, router){
-  const c = new ethers.Contract(token, ABI_ERC20, S);
-  const cur = await c.allowance(ME, router);
-  if(cur.gte(amount)) return;
-  const tx = await c.approve(router, amount);
-  log("🧾 Approve: "+tx.hash); await tx.wait();
-}
-async function wrapETH(amount){
-  const W = TOK.find(x=>x.sym==="WETH").addr;
-  const w = new ethers.Contract(W, ABI_WETH, S);
-  const tx = await w.deposit({ value: amount });
-  log("Wrap ETH→WETH: "+tx.hash); await tx.wait();
-}
-async function unwrapETH(amount){
-  const W = TOK.find(x=>x.sym==="WETH").addr;
-  const w = new ethers.Contract(W, ABI_WETH, S);
-  const tx = await w.withdraw(amount);
-  log("Unwrap WETH→ETH: "+tx.hash); await tx.wait();
-}
-
-$("btnSwap").onclick = async ()=>{
-  try{
-    await ensureProv();
-    if(!S){ await connect(); if(!S) throw new Error("Wallet belum terhubung"); }
-    const v = parseNum($("fromVal").value);
-    if(!v || Number(v)<=0) throw new Error("Masukkan jumlah valid");
-    const amtIn = parseUnitsSafe(v, from.dec);
-    const deadline = Math.floor(Date.now()/1e3) + (TTL_MIN*60);
-    const slipBps = Math.max(0, Math.round((1 - (SLIPPAGE/100)) * 10000)); // for info only
-    // Wrap/Unwrap direct
-    if(from.sym==="ETH" && to.sym==="WETH"){ await wrapETH(amtIn); refreshBalances(); return; }
-    if(from.sym==="WETH" && to.sym==="ETH"){ await unwrapETH(amtIn); refreshBalances(); return; }
-
-    let lastErr = null;
-    for(const R of ROUTERS){
-      try{
-        const r = new ethers.Contract(R, ABI_ROUTER, S);
-        const path = toPath(from,to);
-        const out = await r.getAmountsOut(amtIn, path);
-        const amtOut = out[out.length-1];
-        const minOut = amtOut.mul(10000 - Math.round(SLIPPAGE*100)).div(10000);
-        let tx;
-        if(from.addr==="ETH_NATIVE"){
-          tx = await r.swapExactETHForTokens(minOut, path, ME, deadline, { value: amtIn });
-        } else if(to.addr==="ETH_NATIVE"){
-          await ensureAllow(from.addr, amtIn, R);
-          tx = await r.swapExactTokensForETH(amtIn, minOut, path, ME, deadline);
-        } else {
-          await ensureAllow(from.addr, amtIn, R);
-          tx = await r.swapExactTokensForTokens(amtIn, minOut, path, ME, deadline);
-        }
-        log(`⏳ TX: ${tx.hash}`);
-        const rc = await tx.wait();
-        log(`✅ Swap success • Block ${rc.blockNumber} • ${CHAIN.exp}/tx/${tx.hash}`);
-        refreshBalances();
+        const router=new ethers.Contract(r.addr, ROUTER_ABI, provider);
+        const outs=await router.getAmountsOut(amtIn, path);
+        const out=outs[outs.length-1];
+        const human = ethers.utils.formatUnits(out, isETH(to)?18:to.dec);
+        $("toAmt").value = human;
+        $("estTxt").textContent = "Estimasi: " + human + " " + to.symbol;
+        $("routerName").textContent = "Router: " + r.name;
         return;
-      }catch(e){ lastErr = e; }
+      }catch{} // try next
     }
-    throw lastErr || new Error("Semua router gagal");
-  }catch(e){ log("❌ Swap error: "+(e.data?.message || e.reason || e.message || e)); }
-};
-
-/* ========= Pool (Add Liquidity) — placeholder sederhana ========= */
-$("btnAddLiq").onclick = ()=> log("ℹ️ Add Liquidity: coming soon (UI siap, tx router addLiquidity bisa ditambah).");
-
-/* ========= Tabs ========= */
-function setTab(which){
-  const s = which==="swap";
-  $("swapPanel").classList.toggle("hide", !s);
-  $("poolPanel").classList.toggle("hide", s);
-  $("btnSwapTab").classList.toggle("active", s);
-  $("btnPoolTab").classList.toggle("active", !s);
+    $("estTxt").textContent="Estimasi gagal (no liquidity)"; $("routerName").textContent="Router: auto";
+  }catch(e){
+    $("estTxt").textContent="Estimasi gagal"; $("routerName").textContent="Router: auto";
+  }
 }
-$("btnSwapTab").onclick = ()=>setTab("swap");
-$("btnPoolTab").onclick = ()=>setTab("pool");
 
-/* ========= Init ========= */
-function boot(){
-  // default labels
-  $("fromSym").textContent = from.sym; $("fromIcon").textContent = from.icon;
-  $("toSym").textContent   = to.sym;   $("toIcon").textContent   = to.icon;
-  $("paS").textContent = poolA.sym; $("pbS").textContent = poolB.sym;
-  $("paI").textContent = poolA.icon; $("pbI").textContent = poolB.icon;
-  $("slipView").textContent = SLIPPAGE+"%";
-  $("deadlineView").textContent = "TTL: "+TTL_MIN+"m";
-  window.addEventListener("focus", refreshBalances);
+/** ========= Swap ========= **/
+async function ensureAllowance(token, spender, need){
+  const c=new ethers.Contract(token.addr, ERC20_ABI, signer);
+  const alw=await c.allowance(me, spender);
+  if(alw.gte(need)) return;
+  const tx=await c.approve(spender, need);
+  log("⏳ Approve: "+tx.hash);
+  await tx.wait();
+  log("✅ Approve success");
 }
-boot();
+async function doSwap(){
+  try{
+    if(!signer) await connect();
+    const v=$("fromAmt").value.trim(); if(!v || Number(v)<=0) return log("⚠️ Masukkan jumlah dulu");
+    // choose working router
+    let routerAddr=null, routerName=null, router=null;
+    for (const r of ROUTERS){
+      try{ router=new ethers.Contract(r.addr, ROUTER_ABI, signer); await router.callStatic.getAmountsOut(1,[addrOrWETH(from),addrOrWETH(to)]); routerAddr=r.addr; routerName=r.name; break; }
+      catch{}
+    }
+    if(!routerAddr) return log("❌ Tidak ada router yang valid");
+
+    const deadline = Math.floor(Date.now()/1000)+900;
+    const path=[ addrOrWETH(from), addrOrWETH(to) ];
+    const amtIn = isETH(from) ? ethers.utils.parseEther(v) : ethers.utils.parseUnits(v, from.dec);
+
+    // minimal output 0 (tanpa slippage agar simpel)
+    const minOut = 0;
+
+    log(`🚀 Swap via ${routerName} (${routerAddr})`);
+
+    let tx;
+    if (isETH(from) && !isETH(to)){
+      // ETH → token
+      tx = await router.swapExactETHForTokens(
+        minOut, path, me, deadline, { value: amtIn }
+      );
+    } else if (!isETH(from) && isETH(to)){
+      // token → ETH
+      await ensureAllowance(from, routerAddr, amtIn);
+      tx = await router.swapExactTokensForETH(
+        amtIn, minOut, path, me, deadline
+      );
+    } else {
+      // token → token
+      await ensureAllowance(from, routerAddr, amtIn);
+      tx = await router.swapExactTokensForTokens(
+        amtIn, minOut, path, me, deadline
+      );
+    }
+    log("⏳ TX: "+tx.hash);
+    const rc=await tx.wait();
+    log(`✅ Swap success • Block ${rc.blockNumber}`);
+    refreshBalances();
+  }catch(e){
+    log("❌ Swap error: "+(e.reason||e.data?.message||e.message||e));
+  }
+}
+
+/** ========= Flip ========= **/
+function flipTokens(){
+  const tmp=from; from=to; to=tmp;
+  $("fromSym").textContent=from.symbol;
+  $("toSym").textContent=to.symbol;
+  // swap input/output field values visually:
+  const a=$("fromAmt").value, b=$("toAmt").value;
+  $("fromAmt").value=b; $("toAmt").value=a;
+  refreshBalances(); estimate();
+}
+
+/** ========= Wrap/Unwrap helper (optional quick actions) ========= **/
+async function wrapIfNeeded(){
+  if(!signer) await connect();
+  if (!isETH(from) && !isETH(to)) return; // not used here, but helper kept
+}
+  
+/** ========= Bindings ========= **/
+$("btnConnect").onclick=connect;
+$("fromBtn").onclick=()=>openModal("from");
+$("toBtn").onclick=()=>openModal("to");
+$("modal").onclick=(e)=>{ if(e.target.id==="modal") closeModal(); };
+$("q").oninput=()=>{ /* simple static list; search optional */ };
+$("fromAmt").oninput=()=>{ estimate(); };
+$("flipBtn").onclick=flipTokens;
+$("swapBtn").onclick=doSwap;
+
+// init defaults
+window.addEventListener("load", ()=>{ $("fromSym").textContent=from.symbol; $("toSym").textContent=to.symbol; });
 </script>
 </body>
 </html>
