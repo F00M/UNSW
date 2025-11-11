@@ -1,111 +1,77 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>UNISWOP • Sepolia</title>
+<!DOCTYPE html><html lang="id"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>UNISWOP v6.4 • Sepolia</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <style>
-:root{--bg:#0d111c;--panel:#151b2c;--b:#202a40;--txt:#f5f6fa;--sub:#9ca3af;--g1:#ff4ecd;--g2:#ff007a}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 10% -10%,#1a1330,#0d111c);
-font-family:Inter,sans-serif;color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.app{width:min(440px,95vw)}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px}
-.brand span{background:linear-gradient(90deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--g1),var(--g2));cursor:pointer}
-.card{background:#0f1626;border:1px solid var(--b);border-radius:16px;padding:16px}
-.box{background:#0c111b;border:1px solid var(--b);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin:6px 0}
-.box input{width:55%;background:transparent;border:0;color:#fff;text-align:right;font-size:20px;font-weight:800;outline:none}
-select{background:transparent;border:0;color:#fff;font-size:16px;font-weight:700;outline:none}
-.small{font-size:12px;color:var(--sub)}
-.flip{width:34px;height:34px;border-radius:50%;border:1px solid var(--b);background:#121a2a;color:#fff;cursor:pointer}
-.pre{margin-top:10px;background:#0c111b;border:1px solid var(--b);border-radius:12px;padding:10px;font-size:12px;color:#b5c8ff;max-height:220px;overflow:auto}
-.addBox{position:relative}
-.addInput{display:none;margin-top:8px;width:100%;padding:8px;border-radius:10px;border:1px solid var(--b);background:#0c111b;color:#fff}
-.addBtn{background:none;border:1px solid var(--b);border-radius:50%;color:#fff;width:32px;height:32px;cursor:pointer;font-size:18px}
-.addRow{display:flex;gap:6px;align-items:center}
-</style>
-</head>
-<body>
-<div class="app">
-  <div class="header">
-    <div class="brand">🦄 <span>UNISWOP</span></div>
-    <div class="addRow">
-      <button id="addToggle" class="addBtn">➕</button>
-      <button id="btnConnect" class="btn">Connect</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="addBox">
-      <input id="addAddr" class="addInput" placeholder="Tempel contract address ERC20..." />
-    </div>
-
-    <div class="box"><select id="tokenA"></select><input id="amtA" placeholder="0.0"/></div>
-    <div class="small" id="balA">Balance: -</div>
-    <div style="text-align:center;margin:8px 0"><button id="flip" class="flip">⇅</button></div>
-    <div class="box"><select id="tokenB"></select><input id="amtB" placeholder="0.0" disabled/></div>
-    <div class="small" id="balB">Balance: -</div>
-
-    <button id="btnSwap" class="btn" style="width:100%;margin-top:10px">Swap</button>
-    <div class="small" id="rate">Estimasi: -</div>
-    <pre id="log">log siap...</pre>
-  </div>
-</div>
-
+:root{--bg:#0e101b;--panel:#151b2c;--b:#202a40;--txt:#fafafa;--sub:#9ca3af;--p1:#ff4ecd;--p2:#ff007a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% -10%,#1b1230,#0e101b);
+font-family:Inter,sans-serif;color:var(--txt);display:flex;justify-content:center;align-items:center;min-height:100vh}
+.app{width:min(430px,94vw)}.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.brand{font-weight:800;font-size:20px;background:linear-gradient(90deg,var(--p1),var(--p2));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent}.btn{border:0;border-radius:10px;
+padding:9px 14px;background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:700;cursor:pointer}
+.card{background:#101523;border:1px solid var(--b);border-radius:14px;padding:16px}
+.sel{display:flex;justify-content:space-between;align-items:center;background:#0b0f18;border:1px solid var(--b);
+border-radius:12px;padding:12px;margin:6px 0}select,input{background:transparent;border:0;color:#fff;font-size:17px;font-weight:700;outline:none}
+input{text-align:right;width:55%}.flip{border:1px solid var(--b);background:#121826;border-radius:50%;width:34px;height:34px;color:#fff;cursor:pointer}
+.small{font-size:12px;color:var(--sub)}.pre{background:#0b0f18;border:1px solid var(--b);border-radius:10px;
+padding:8px;font-size:12px;color:#b6c6ff;max-height:180px;overflow:auto;margin-top:8px}
+.add{border:1px solid var(--b);background:none;color:#fff;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer}
+.addIn{display:none;width:100%;padding:8px;border:1px solid var(--b);border-radius:8px;background:#0b0f18;color:#fff;margin-top:6px}
+</style></head><body><div class="app">
+<div class="head"><div class="brand">🦄 UNISWOP</div><div style="display:flex;gap:6px;align-items:center">
+<button id="add" class="add">➕</button><button id="connect" class="btn">Connect</button></div></div>
+<div class="card">
+<input id="addIn" class="addIn" placeholder="Tempel contract ERC20 lalu Enter"/>
+<div class="sel"><select id="a"></select><input id="va" placeholder="0.0"/></div>
+<div class="small" id="ba">Balance -</div>
+<div style="text-align:center;margin:8px"><button id="flip" class="flip">⇅</button></div>
+<div class="sel"><select id="b"></select><input id="vb" placeholder="0.0" disabled/></div>
+<div class="small" id="bb">Balance -</div>
+<button id="swap" class="btn" style="width:100%;margin-top:10px">Swap</button>
+<div class="small" id="rate">Estimasi -</div><pre id="log">log siap…</pre></div></div>
 <script>
-const CHAIN={id:11155111,hex:"0xaa36a7",explorer:"https://sepolia.etherscan.io"};
+const CHAIN={id:11155111,hex:"0xaa36a7",exp:"https://sepolia.etherscan.io"};
 const ROUTERS=["0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3","0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b"];
-let TOKENS=[{sym:"ETH",addr:"ETH_NATIVE",dec:18},{sym:"WETH",addr:"0xfff9976782d46cc05630d1f6ebab18b2324d6b14",dec:18},{sym:"USDC",addr:"0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",dec:6}],provider,signer,me;
-const $=i=>document.getElementById(i),log=m=>{const el=$("log");el.textContent+=(el.textContent?"\n":"")+m;el.scrollTop=el.scrollHeight;};
-const ERC20=["function symbol()view returns(string)","function decimals()view returns(uint8)","function balanceOf(address)view returns(uint)","function allowance(address,address)view returns(uint)","function approve(address,uint)returns(bool)"];
-const ROUTER_ABI=["function getAmountsOut(uint256,address[])view returns(uint256[])","function swapExactTokensForTokens(uint,uint,address[],address,uint)","function swapExactETHForTokens(uint,address[],address,uint)payable","function swapExactTokensForETH(uint,uint,address[],address,uint)"];
-const WETH_ABI=["function deposit()payable","function withdraw(uint)"];
-
-function refreshTokens(){["tokenA","tokenB"].forEach(id=>{const s=$(id);const pv=s.value;s.innerHTML="";TOKENS.forEach((t,i)=>s.add(new Option(t.sym,i)));if(pv)s.value=pv;});}
-refreshTokens();
-
-async function ensureProvider(){if(!window.ethereum)throw new Error("Install MetaMask");if(!provider)provider=new ethers.providers.Web3Provider(window.ethereum,"any");}
-async function connect(){try{await ensureProvider();await provider.send("eth_requestAccounts",[]);signer=provider.getSigner();me=await signer.getAddress();const n=await provider.getNetwork();if(n.chainId!==CHAIN.id)await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:CHAIN.hex}]});$("btnConnect").textContent=me.slice(0,6)+"…"+me.slice(-4);log(`✅ Connected ${me}`);refreshBalances();}catch(e){log("❌ Connect error: "+e.message);}}
-$("btnConnect").onclick=connect;
-
-async function addToken(addr){try{if(!/^0x[0-9a-fA-F]{40}$/.test(addr))throw new Error("Invalid address");await ensureProvider();const c=new ethers.Contract(addr,ERC20,provider);let sym="TKN",dec=18;try{sym=await c.symbol();dec=await c.decimals();}catch{}TOKENS.push({sym,addr,dec:Number(dec)});refreshTokens();$("addAddr").style.display="none";log(`✅ Token ${sym} added`);}catch(e){log("❌ Add token: "+e.message);}}
-$("addToggle").onclick=()=>{$("addAddr").style.display=$("addAddr").style.display==="none"?"block":"none";}
-$("addAddr").onkeypress=e=>{if(e.key==="Enter")addToken(e.target.value.trim());}
-
-async function balanceOf(t){if(!provider||!me)return"0";if(t.addr==="ETH_NATIVE"){const v=await provider.getBalance(me);return ethers.utils.formatUnits(v,18);}const c=new ethers.Contract(t.addr,ERC20,provider);return ethers.utils.formatUnits(await c.balanceOf(me),t.dec);}
-async function refreshBalances(){try{const ta=TOKENS[+$("tokenA").value],tb=TOKENS[+$("tokenB").value];const [ba,bb]=await Promise.all([balanceOf(ta),balanceOf(tb)]);$("balA").textContent=`Balance: ${(+ba).toFixed(4)} ${ta.sym}`;$("balB").textContent=`Balance: ${(+bb).toFixed(4)} ${tb.sym}`;}catch{}}
-
-function sNum(s){s=String(s||"").trim().replace(/,/g,"");return /^\d*\.?\d*$/.test(s)?s:"";}
-function pUnits(s,d){return ethers.utils.parseUnits(sNum(s)||"0",d);}
-function toHuman(b,d){return Number(ethers.utils.formatUnits(b,d));}
-function path(){const A=TOKENS[+$("tokenA").value],B=TOKENS[+$("tokenB").value];const w=TOKENS[1].addr;return[(A.addr==="ETH_NATIVE"?w:A.addr),(B.addr==="ETH_NATIVE"?w:B.addr)];}
-
-async function est(){try{const ta=TOKENS[+$("tokenA").value],tb=TOKENS[+$("tokenB").value];const amt=sNum($("amtA").value);if(!amt||ta===tb)return $("rate").textContent="Estimasi: -";const r=new ethers.Contract(ROUTERS[0],ROUTER_ABI,provider);const out=(await r.getAmountsOut(pUnits(amt,ta.dec),path())).pop();$("amtB").value=toHuman(out,tb.dec).toFixed(6);$("rate").textContent=`1 ${ta.sym} ≈ ${(toHuman(out,tb.dec)/+amt).toFixed(6)} ${tb.sym}`;}catch{$("amtB").value="";$("rate").textContent="Estimasi gagal (no liquidity)";}}
-$("amtA").oninput=()=>{ $("amtA").value=sNum($("amtA").value); est(); };
-["tokenA","tokenB"].forEach(i=>$(i).onchange=()=>{refreshBalances();est();});
-$("flip").onclick=()=>{[ $("tokenA").value,$("tokenB").value]=[$("tokenB").value,$("tokenA").value];[ $("amtA").value,$("amtB").value]=[$("amtB").value,$("amtA").value];refreshBalances();est();};
-
-async function ensureAllow(token,need,router){const erc=new ethers.Contract(token,ERC20,signer);const cur=await erc.allowance(me,router);if(cur.gte(need))return;const tx=await erc.approve(router,need);log(`🧾 Approve ${tx.hash}`);await tx.wait();}
-
-async function wrap(amount){const w=new ethers.Contract(TOKENS[1].addr,WETH_ABI,signer);const tx=await w.deposit({value:amount});log(`Wrap TX: ${tx.hash}`);await tx.wait();log("✅ Wrapped ETH");}
-async function unwrap(amount){const w=new ethers.Contract(TOKENS[1].addr,WETH_ABI,signer);const tx=await w.withdraw(amount);log(`Unwrap TX: ${tx.hash}`);await tx.wait();log("✅ Unwrapped WETH");}
-
-$("btnSwap").onclick=async()=>{try{await ensureProvider();if(!signer)await connect();const ta=TOKENS[+$("tokenA").value],tb=TOKENS[+$("tokenB").value];const amt=sNum($("amtA").value);if(!amt||ta===tb)throw new Error("Invalid input");const amount=pUnits(amt,ta.dec);
-if(ta.sym==="ETH"&&tb.sym==="WETH")return await wrap(amount);
-if(ta.sym==="WETH"&&tb.sym==="ETH")return await unwrap(amount);
-const pathx=path();const deadline=Math.floor(Date.now()/1000)+1200;
-for(const routerAddr of ROUTERS){try{
-const r=new ethers.Contract(routerAddr,ROUTER_ABI,signer);
-const outs=(await r.getAmountsOut(amount,pathx));const min=outs.pop().mul(9950).div(10000);
-let tx;if(ta.addr==="ETH_NATIVE"){tx=await r.swapExactETHForTokens(min,pathx,me,deadline,{value:amount});}
-else if(tb.addr==="ETH_NATIVE"){await ensureAllow(ta.addr,amount,routerAddr);tx=await r.swapExactTokensForETH(amount,min,pathx,me,deadline);}
-else{await ensureAllow(ta.addr,amount,routerAddr);tx=await r.swapExactTokensForTokens(amount,min,pathx,me,deadline);}
-log(`TX: ${tx.hash}`);const rc=await tx.wait();log(`✅ Swap OK block ${rc.blockNumber}`);refreshBalances();return;}catch(e){log(`⚠️ Router fail: ${e.reason||e.message}`);}}
-throw new Error("Semua router gagal");}catch(e){log("❌ "+(e.data?.message||e.message));}};
-</script>
-</body>
-</html>
+let TOK=[{s:"ETH",a:"ETH_NATIVE",d:18},{s:"WETH",a:"0xfff9976782d46cc05630d1f6ebab18b2324d6b14",d:18},{s:"USDC",a:"0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",d:6}],
+P,S,M;const $=i=>document.getElementById(i),L=m=>{let e=$("log");e.textContent+=(e.textContent?"\n":"")+m;e.scrollTop=e.scrollHeight};
+const ERC20=["function symbol()view returns(string)","function decimals()view returns(uint8)","function balanceOf(address)view returns(uint)",
+"function allowance(address,address)view returns(uint)","function approve(address,uint)returns(bool)"],
+ROUT=["function getAmountsOut(uint,address[])view returns(uint[])","function swapExactTokensForTokens(uint,uint,address[],address,uint)",
+"function swapExactETHForTokens(uint,address[],address,uint)payable","function swapExactTokensForETH(uint,uint,address[],address,uint)"],
+WETH=["function deposit()payable","function withdraw(uint)"];
+function refSel(){["a","b"].forEach(i=>{let s=$(i);s.innerHTML="";TOK.forEach((t,k)=>s.add(new Option(t.s,k)));})}
+refSel();
+async function prov(){if(!window.ethereum)throw Error("Install MetaMask");if(!P)P=new ethers.providers.Web3Provider(window.ethereum,"any")}
+$("connect").onclick=async()=>{try{await prov();await P.send("eth_requestAccounts",[]);S=P.getSigner();M=await S.getAddress();let n=await P.getNetwork();
+if(n.chainId!==CHAIN.id)await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:CHAIN.hex}]});
+$("connect").textContent=M.slice(0,6)+"…"+M.slice(-4);L("✅ Connected");bal();}catch(e){L("❌ "+e.message)}}
+$("add").onclick=()=>$("addIn").style.display=$("addIn").style.display==="none"?"block":"none";
+$("addIn").onkeypress=e=>{if(e.key==="Enter")addT(e.target.value.trim())}
+async function addT(a){try{if(!/^0x[0-9a-fA-F]{40}$/.test(a))throw Error("Addr invalid");await prov();let c=new ethers.Contract(a,ERC20,P);
+let s="TKN",d=18;try{s=await c.symbol();d=await c.decimals();}catch{}TOK.push({s,a,d:+d});refSel();$("addIn").style.display="none";L("✅ Token "+s);}catch(e){L("❌ Add "+e.message)}}
+async function bal(){try{const t=i=>TOK[i],b=async x=>{if(x.a==="ETH_NATIVE")return ethers.utils.formatUnits(await P.getBalance(M),x.d);
+return ethers.utils.formatUnits(await(new ethers.Contract(x.a,ERC20,P)).balanceOf(M),x.d)};
+let [A,B]=[t(+$("a").value),t(+$("b").value)];[$("ba").textContent,$("bb").textContent]=[`Bal: ${(+await b(A)).toFixed(4)} ${A.s}`,`Bal: ${(+await b(B)).toFixed(4)} ${B.s}`]}catch{}}
+function sNum(v){v=(v||"").replace(/,/g,"");return /^\d*\.?\d*$/.test(v)?v:""}function pU(v,d){return ethers.utils.parseUnits(sNum(v)||"0",d)}
+function path(){const A=TOK[+$("a").value],B=TOK[+$("b").value];const w=TOK[1].a;return[(A.a==="ETH_NATIVE"?w:A.a),(B.a==="ETH_NATIVE"?w:B.a)]}
+async function est(){try{const ta=TOK[+$("a").value],tb=TOK[+$("b").value];const v=sNum($("va").value);if(!v||ta===tb)return $("rate").textContent="Estimasi -";
+let r=new ethers.Contract(ROUTERS[0],ROUT,P);const out=(await r.getAmountsOut(pU(v,ta.d),path())).pop();const h=Number(ethers.utils.formatUnits(out,tb.d));
+$("vb").value=h.toFixed(6);$("rate").textContent=`1 ${ta.s} ≈ ${(h/+v).toFixed(6)} ${tb.s}`;}catch{$("vb").value="";$("rate").textContent="Estimasi gagal"}}
+["a","b"].forEach(i=>$(i).onchange=()=>{bal();est();});$("va").oninput=()=>{ $("va").value=sNum($("va").value);est();};
+$("flip").onclick=()=>{[$("a").value,$("b").value]=[$("b").value,$("a").value)];[$("va").value,$("vb").value]=[$("vb").value,$("va").value];bal();est();};
+async function allow(t,v,r){let c=new ethers.Contract(t,ERC20,S),al=await c.allowance(M,r);if(al.gte(v))return;let x=await c.approve(r,v);L("🧾 Approve "+x.hash);await x.wait()}
+async function wrap(v){let w=new ethers.Contract(TOK[1].a,WETH,S);let x=await w.deposit({value:v});L("Wrap "+x.hash);await x.wait()}
+async function unwrap(v){let w=new ethers.Contract(TOK[1].a,WETH,S);let x=await w.withdraw(v);L("Unwrap "+x.hash);await x.wait()}
+$("swap").onclick=async()=>{try{await prov();if(!S)await $("connect").onclick();let ta=TOK[+$("a").value],tb=TOK[+$("b").value];const val=sNum($("va").value);
+if(!val||ta===tb)throw Error("Input invalid");const amt=pU(val,ta.d);
+if(ta.s==="ETH"&&tb.s==="WETH")return await wrap(amt);if(ta.s==="WETH"&&tb.s==="ETH")return await unwrap(amt);
+const pathx=path(),dl=Math.floor(Date.now()/1e3)+1200;
+for(const rA of ROUTERS){try{let r=new ethers.Contract(rA,ROUT,S);let out=(await r.getAmountsOut(amt,pathx)).pop(),min=out.mul(9950).div(10000),x;
+if(ta.a==="ETH_NATIVE")x=await r.swapExactETHForTokens(min,pathx,M,dl,{value:amt});
+else if(tb.a==="ETH_NATIVE"){await allow(ta.a,amt,rA);x=await r.swapExactTokensForETH(amt,min,pathx,M,dl);}
+else{await allow(ta.a,amt,rA);x=await r.swapExactTokensForTokens(amt,min,pathx,M,dl);}
+L("TX "+x.hash);await x.wait();L("✅ Swap OK");bal();return;}catch(e){L("⚠️ Router fail "+e.message)}}throw Error("Semua router gagal")}
+catch(e){L("❌ "+(e.data?.message||e.message))}};
+</script></body></html>
