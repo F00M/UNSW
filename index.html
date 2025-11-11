@@ -35,16 +35,11 @@ body{
   box-shadow:0 10px 36px rgba(0,0,0,.4); margin:0 auto;
 }
 .panel{background:var(--field2);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
-
-/* ROW: input rata tengah, tombol token di kanan */
 .row{
   display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px;
   background:var(--field); border:1px solid var(--border); border-radius:12px; padding:12px 14px;
 }
-.inp{
-  width:100%; text-align:right; background:transparent; border:0; color:#fff;
-  font-size:22px; font-weight:700; outline:none;
-}
+.inp{ width:100%; text-align:right; background:transparent; border:0; color:#fff; font-size:22px; font-weight:700; outline:none }
 .tkbtn{
   display:flex; align-items:center; gap:8px; border:1px solid #283455;
   background:#121a30; border-radius:12px; padding:8px 12px; cursor:pointer;
@@ -52,18 +47,14 @@ body{
 }
 .sym{background:#1b2542;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;font-size:11px}
 .info{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);padding:0 2px}
-
 .centerbtn{display:flex;justify-content:center;align-items:center;margin:-4px 0}
 .centerbtn button{
   background:#18203a;border:1px solid #283455;border-radius:50%;
   width:38px;height:38px;display:grid;place-items:center;cursor:pointer;transition:all .2s
 }
 .centerbtn button:hover{background:#242f54}
-
 .btnxl{width:100%;padding:14px;margin-top:6px;border-radius:14px;border:0;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--p1),var(--p2));cursor:pointer}
 pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px;padding:10px;font-size:12px;max-height:160px;overflow:auto;margin-top:12px}
-
-/* Modal token */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:12px;z-index:1000}
 .sheet{width:min(430px,92vw);background:#0b1120;border:1px solid var(--border);border-radius:16px;padding:14px}
 .sheet h4{margin:0 0 8px}
@@ -71,7 +62,6 @@ pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px
 .list{margin-top:10px;display:grid;gap:8px;max-height:320px;overflow:auto}
 .item{display:flex;align-items:center;gap:10px;border:1px solid #253152;background:#101834;border-radius:12px;padding:10px;cursor:pointer}
 .item .sym{width:26px;height:26px}
-
 @media (max-width:520px){
   .header{padding:10px 12px}
   .card{margin:0 12px}
@@ -82,7 +72,6 @@ pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px
 <body>
   <div class="header">
     <div class="brand">
-      <!-- unicorn inline -->
       <svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff4ecd"/><stop offset="1" stop-color="#ff007a"/></linearGradient></defs><path fill="url(#g)" d="M410 182c-9-57-59-101-119-101-66 0-120 54-120 120 0 3 0 7 1 10C118 223 80 269 80 324c0 65 53 118 118 118 57 0 106-41 116-95 55-11 98-60 98-118 0-26-8-50-22-69z"/></svg>
       UNISWOP
     </div>
@@ -94,21 +83,18 @@ pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px
   <div class="main">
     <div class="card">
       <div class="panel">
-        <!-- FROM -->
         <div class="row">
           <input id="fromAmt" class="inp" placeholder="0.0" inputmode="decimal"/>
           <button id="fromBtn" class="tkbtn"><span class="sym">E</span><span id="fromSym">ETH</span></button>
         </div>
         <div class="info"><span id="fromBal">Balance: -</span><span id="estTxt">Estimasi: -</span></div>
 
-        <!-- middle flip -->
         <div class="centerbtn">
           <button id="flipBtn" title="Tukar posisi">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 9h16M10 5l-6 4 6 4M20 15H4M14 19l6-4-6-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
 
-        <!-- TO -->
         <div class="row">
           <input id="toAmt" class="inp" placeholder="0.0" disabled/>
           <button id="toBtn" class="tkbtn"><span class="sym">U</span><span id="toSym">USDC</span></button>
@@ -121,7 +107,6 @@ pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px
     </div>
   </div>
 
-  <!-- Token Modal -->
   <div id="modal" class="modal" role="dialog" aria-modal="true">
     <div class="sheet">
       <h4>Pilih Token</h4>
@@ -131,18 +116,20 @@ pre{background:#0b1120;border:1px solid #1f2a45;color:#b7c8ff;border-radius:12px
   </div>
 
 <script>
-/** ====== Config Sepolia ====== */
+/** ===== Config Sepolia ===== */
 const CHAIN = { id:11155111, hex:"0xaa36a7", name:"Sepolia" };
 const TOKENS = {
   ETH : { symbol:"ETH",  addr:"ETH",        dec:18 },
   WETH: { symbol:"WETH", addr:"0xfff9976782d46cc05630d1f6ebab18b2324d6b14", dec:18 },
   USDC: { symbol:"USDC", addr:"0x1c7d4b196cb0c7b01d743fbc6116a902379c7238", dec:6  },
 };
-// Routers (coba berurutan)
+// V2 Routers (swap). JANGAN masukkan V3 factory di sini.
 const ROUTERS = [
   { name:"RouterV2",  addr:"0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3" },
   { name:"RouterAlt", addr:"0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b" },
 ];
+// Uniswap V3 (info saja)
+const UNISWAP_V3_FACTORY = "0x0227628f3F023bb0B980b67D528571c95c6DaC1c";
 
 const ERC20_ABI=[
   "function balanceOf(address) view returns (uint256)",
@@ -152,11 +139,17 @@ const ERC20_ABI=[
   "function symbol() view returns (string)",
   "function name() view returns (string)"
 ];
+const WETH_ABI=[
+  "function deposit() payable",
+  "function withdraw(uint256)",
+  "function balanceOf(address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)"
+];
 const ROUTER_ABI=[
   "function getAmountsOut(uint256,address[]) view returns (uint256[])",
   "function swapExactETHForTokens(uint256,address[],address,uint256) payable returns (uint256[])",
   "function swapExactTokensForETH(uint256,address[],address,uint256) returns (uint256[])",
-  "function swapExactTokensForTokens(uint256,address[],address,uint256) returns (uint256[])"
+  "function swapExactTokensForTokens(uint256,uint256,address[],address,uint256) returns (uint256[])"
 ];
 
 const $=id=>document.getElementById(id);
@@ -166,12 +159,11 @@ let provider, signer, me;
 let from=TOKENS.ETH, to=TOKENS.USDC;
 let whichSelecting="from";
 
-/** ===== Helpers ===== */
 function isETH(t){ return t.addr==="ETH"; }
 function addrOrWETH(t){ return isETH(t)? TOKENS.WETH.addr : t.addr; }
 function format(n,dec=6){ try{ return Number(n).toLocaleString(undefined,{maximumFractionDigits:dec}); }catch{return n} }
 
-/** ===== Wallet ===== */
+/** Wallet */
 async function connect(){
   try{
     if(!window.ethereum) throw new Error("Install MetaMask dulu");
@@ -188,11 +180,10 @@ async function connect(){
   }catch(e){ log("❌ Connect error: "+(e.message||e)); }
 }
 
-/** ===== Balances ===== */
+/** Balances */
 async function refreshBalances(){
   if(!provider||!me) return;
   try{
-    // from
     if(isETH(from)){
       const bal = await provider.getBalance(me);
       $("fromBal").textContent = "Balance: "+format(ethers.utils.formatEther(bal),4);
@@ -201,7 +192,6 @@ async function refreshBalances(){
       const bal=await c.balanceOf(me);
       $("fromBal").textContent = "Balance: "+format(ethers.utils.formatUnits(bal, from.dec),4);
     }
-    // to
     if(isETH(to)){
       const bal = await provider.getBalance(me);
       $("toBal").textContent = "Balance: "+format(ethers.utils.formatEther(bal),4);
@@ -210,23 +200,20 @@ async function refreshBalances(){
       const bal=await c.balanceOf(me);
       $("toBal").textContent = "Balance: "+format(ethers.utils.formatUnits(bal, to.dec),4);
     }
-  }catch(e){
+  }catch{
     $("fromBal").textContent="Balance: -";
     $("toBal").textContent="Balance: -";
   }
 }
 
-/** ===== Estimation ===== */
+/** Estimation */
 async function estimate(){
   try{
     if(!provider) return;
     const v=$("fromAmt").value.trim();
     if(!v || Number(v)<=0){ $("toAmt").value=""; $("estTxt").textContent="Estimasi: -"; return; }
 
-    const amtIn = ethers.utils.parseUnits(
-      v,
-      isETH(from)?18:from.dec
-    );
+    const amtIn = ethers.utils.parseUnits(v, isETH(from)?18:from.dec);
     const path = [ addrOrWETH(from), addrOrWETH(to) ];
 
     for (const r of ROUTERS){
@@ -239,22 +226,18 @@ async function estimate(){
         $("estTxt").textContent = "Estimasi: " + human + " " + to.symbol;
         $("routerName").textContent = "Router: " + r.name;
         return;
-      }catch{} // fallback ke router berikutnya
+      }catch{} // fallback
     }
     $("estTxt").textContent="Estimasi gagal (no liquidity)";
     $("routerName").textContent="Router: auto";
-  }catch(e){
+  }catch{
     $("estTxt").textContent="Estimasi gagal";
     $("routerName").textContent="Router: auto";
   }
 }
 
-/** ===== Token Modal ===== */
-function openModal(which){
-  whichSelecting=which;
-  renderTokenList("");
-  $("modal").style.display="flex";
-}
+/** Token Modal */
+function openModal(which){ whichSelecting=which; renderTokenList($("q").value=""); $("modal").style.display="flex"; }
 function closeModal(){ $("modal").style.display="none"; }
 $("modal").onclick=(e)=>{ if(e.target.id==="modal") closeModal(); }
 $("q").oninput=()=>renderTokenList($("q").value.trim());
@@ -263,14 +246,11 @@ function renderTokenList(q){
   const L=$("list"); L.innerHTML="";
   const all = Object.values(TOKENS);
   let view = all;
-
-  // Jika input 0x..., coba add token baru (lazy)
   if(/^0x[a-fA-F0-9]{40}$/.test(q)){
     view = [...all, {symbol:"(Tambah)", addr:q, dec:"?", _new:true}];
   }else if(q){
     view = all.filter(t=> t.symbol.toLowerCase().includes(q.toLowerCase()) || (t.addr!=="ETH" && t.addr.toLowerCase().includes(q.toLowerCase())));
   }
-
   for (const t of view){
     const item=document.createElement("div");
     item.className="item";
@@ -284,7 +264,6 @@ function renderTokenList(q){
 }
 
 async function selectToken(t){
-  // jika token baru dari input 0x..., resolve decimals & symbol
   if(t._new){
     try{
       const c=new ethers.Contract(t.addr, ERC20_ABI, provider||new ethers.providers.Web3Provider(window.ethereum,"any"));
@@ -293,23 +272,14 @@ async function selectToken(t){
       TOKENS[sym] = { symbol:sym, addr:t.addr, dec:Number(dec) };
       t = TOKENS[sym];
       log(`➕ Token ditambahkan: ${sym} (${t.addr}), dec=${t.dec}`);
-    }catch(e){
-      log("⚠️ Gagal membaca token baru: "+(e.message||e));
-      return;
-    }
+    }catch(e){ log("⚠️ Gagal membaca token baru: "+(e.message||e)); return; }
   }
-
-  if(whichSelecting==="from"){
-    from=t; $("fromSym").textContent=t.symbol;
-  }else{
-    to=t; $("toSym").textContent=t.symbol;
-  }
-  closeModal();
-  refreshBalances();
-  estimate();
+  if(whichSelecting==="from"){ from=t; $("fromSym").textContent=t.symbol; }
+  else{ to=t; $("toSym").textContent=t.symbol; }
+  closeModal(); refreshBalances(); estimate();
 }
 
-/** ===== Swap ===== */
+/** Allowance helper */
 async function ensureAllowance(token, spender, need){
   const c=new ethers.Contract(token.addr, ERC20_ABI, signer);
   const alw=await c.allowance(me, spender);
@@ -320,14 +290,19 @@ async function ensureAllowance(token, spender, need){
   log("✅ Approve success");
 }
 
+/** Robust swap:
+ *  1) Coba fungsi V2 standar (ETH variants / tokens)
+ *  2) Jika gagal encoding/arg mismatch → fallback WRAP/UNWRAP WETH + tokensForTokens
+ */
 async function doSwap(){
   try{
     if(!signer) await connect();
     const v=$("fromAmt").value.trim(); if(!v || Number(v)<=0) return log("⚠️ Masukkan jumlah dulu");
 
-    // pilih router workable
     let routerAddr=null, routerName=null, router=null;
     const path=[ addrOrWETH(from), addrOrWETH(to) ];
+
+    // pilih router workable via getAmountsOut
     for (const r of ROUTERS){
       try{
         const test=new ethers.Contract(r.addr, ROUTER_ABI, signer);
@@ -337,43 +312,85 @@ async function doSwap(){
     }
     if(!routerAddr) return log("❌ Tidak ada router yang valid (cek LP)");
 
-    const deadline = Math.floor(Date.now()/1000)+900;
     const amtIn = ethers.utils.parseUnits(v, isETH(from)?18:from.dec);
-    const minOut = 0; // simple
+    const minOut = 0;
+    const deadline = Math.floor(Date.now()/1000)+900;
 
     log(`🚀 Swap via ${routerName} (${routerAddr})`);
-    let tx;
-    if (isETH(from) && !isETH(to)){
-      tx = await router.swapExactETHForTokens(minOut, path, me, deadline, { value: amtIn });
-    } else if (!isETH(from) && isETH(to)){
-      await ensureAllowance(from, routerAddr, amtIn);
-      tx = await router.swapExactTokensForETH(amtIn, minOut, path, me, deadline);
-    } else {
-      await ensureAllowance(from, routerAddr, amtIn);
-      tx = await router.swapExactTokensForTokens(amtIn, minOut, path, me, deadline);
+
+    // Try native ETH variants first
+    try{
+      if (isETH(from) && !isETH(to)){
+        const tx = await router.swapExactETHForTokens(minOut, path, me, deadline, { value: amtIn });
+        log("⏳ TX: "+tx.hash); const rc=await tx.wait(); log(`✅ Swap success • Block ${rc.blockNumber}`); refreshBalances(); estimate(); return;
+      }
+      if (!isETH(from) && isETH(to)){
+        await ensureAllowance(from, routerAddr, amtIn);
+        const tx = await router.swapExactTokensForETH(amtIn, minOut, path, me, deadline);
+        log("⏳ TX: "+tx.hash); const rc=await tx.wait(); log(`✅ Swap success • Block ${rc.blockNumber}`); refreshBalances(); estimate(); return;
+      }
+      if (!isETH(from) && !isETH(to)){
+        await ensureAllowance(from, routerAddr, amtIn);
+        const tx = await router.swapExactTokensForTokens(amtIn, minOut, path, me, deadline);
+        log("⏳ TX: "+tx.hash); const rc=await tx.wait(); log(`✅ Swap success • Block ${rc.blockNumber}`); refreshBalances(); estimate(); return;
+      }
+    }catch(encErr){
+      // Encoding/ABI mismatch → fallback WETH route
+      log("ℹ️ Fallback via WETH route…");
     }
-    log("⏳ TX: "+tx.hash);
-    const rc=await tx.wait();
-    log(`✅ Swap success • Block ${rc.blockNumber}`);
-    refreshBalances();
-    estimate();
+
+    // Fallback: wrap/unwrap WETH + tokensForTokens only
+    const weth = new ethers.Contract(TOKENS.WETH.addr, WETH_ABI, signer);
+
+    if (isETH(from) && !isETH(to)){
+      // Wrap ETH → WETH
+      const txW = await weth.deposit({ value: amtIn });
+      log("⏳ Wrap ETH→WETH: "+txW.hash); await txW.wait();
+      // Approve WETH to router
+      await weth.approve(routerAddr, amtIn);
+      // Swap WETH -> token
+      const tx = await router.swapExactTokensForTokens(amtIn, minOut, [TOKENS.WETH.addr, to.addr], me, deadline);
+      log("⏳ TX: "+tx.hash); const rc=await tx.wait(); log(`✅ Swap success • Block ${rc.blockNumber}`);
+      refreshBalances(); estimate(); return;
+    }
+
+    if (!isETH(from) && isETH(to)){
+      // Token -> WETH
+      await ensureAllowance(from, routerAddr, amtIn);
+      const tx = await router.swapExactTokensForTokens(amtIn, minOut, [from.addr, TOKENS.WETH.addr], me, deadline);
+      log("⏳ Swap to WETH: "+tx.hash); const rc=await tx.wait();
+      // Unwrap WETH (withdraw all delta WETH)
+      const wbal = await weth.balanceOf(me);
+      if (wbal.gt(0)){
+        const txU = await weth.withdraw(wbal);
+        log("⏳ Unwrap WETH→ETH: "+txU.hash); await txU.wait();
+      }
+      log(`✅ Swap success • Block ${rc.blockNumber}`);
+      refreshBalances(); estimate(); return;
+    }
+
+    if (!isETH(from) && !isETH(to)){
+      await ensureAllowance(from, routerAddr, amtIn);
+      const tx = await router.swapExactTokensForTokens(amtIn, minOut, [from.addr, to.addr], me, deadline);
+      log("⏳ TX: "+tx.hash); const rc=await tx.wait(); log(`✅ Swap success • Block ${rc.blockNumber}`);
+      refreshBalances(); estimate(); return;
+    }
+
   }catch(e){
     log("❌ Swap error: "+(e.reason||e.data?.message||e.message||e));
   }
 }
 
-/** ===== Flip ===== */
+/** Flip */
 function flipTokens(){
   const tmp=from; from=to; to=tmp;
-  $("fromSym").textContent=from.symbol;
-  $("toSym").textContent=to.symbol;
+  $("fromSym").textContent=from.symbol; $("toSym").textContent=to.symbol;
   const a=$("fromAmt").value, b=$("toAmt").value;
   $("fromAmt").value=b; $("toAmt").value=a;
-  refreshBalances();
-  estimate();
+  refreshBalances(); estimate();
 }
 
-/** ===== Bindings ===== */
+/** Bindings */
 $("btnConnect").onclick=connect;
 $("fromBtn").onclick=()=>openModal("from");
 $("toBtn").onclick=()=>openModal("to");
@@ -381,7 +398,12 @@ $("fromAmt").oninput=estimate;
 $("flipBtn").onclick=flipTokens;
 $("swapBtn").onclick=doSwap;
 
-// init
+/** Modal utilities */
+function openModal(which){ whichSelecting=which; renderTokenList($("q").value=""); $("modal").style.display="flex"; }
+function closeModal(){ $("modal").style.display="none"; }
+$("modal").onclick=(e)=>{ if(e.target.id==="modal") closeModal(); }
+$("q").oninput=()=>renderTokenList($("q").value.trim());
+
 window.addEventListener("load", ()=>{
   $("fromSym").textContent=from.symbol;
   $("toSym").textContent=to.symbol;
