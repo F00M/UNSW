@@ -89,6 +89,11 @@ const CHAIN = { id:11155111, hex:"0xaa36a7", name:"Sepolia", explorer:"https://s
 const ROUTER = "0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3";
 const FACTORY= "0xF62c03E08ada871A0bEb309762E260a7a6a880E6";
 
+/* ===== 🔵 UNISWAP V3 ADDON (BARU, TIDAK MERUSAK) ===== */
+const V3_FACTORY = "0x1F98431c8aD98523631AE4a59f267346ea31F984";
+const V3_QUOTER  = "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6";
+const V3_FEES = [100, 500, 3000, 10000];
+
 const TOKENS=[
   {sym:"ETH", addr:"ETH_NATIVE", dec:18},
   {sym:"WETH",addr:"0xfff9976782d46cc05630d1f6ebab18b2324d6b14",dec:18},
@@ -111,6 +116,10 @@ const ROUTER_ABI=[
   "function swapExactTokensForETH(uint256,uint256,address[],address,uint256) returns (uint256[])"
 ];
 
+/* ===== 🔵 V3 ABI ADDON ===== */
+const V3_FACTORY_ABI=[ "function getPool(address,address,uint24) view returns (address)" ];
+const V3_QUOTER_ABI=[ "function quoteExactInputSingle(address,address,uint24,uint256,uint160) returns (uint256)" ];
+
 const $=id=>document.getElementById(id);
 const log= m=>{ const el=$("log"); el.textContent+=(el.textContent? "\n":"")+m; el.scrollTop=el.scrollHeight; console.log(m); };
 
@@ -122,16 +131,36 @@ function initTokens(){
     const el=$(id); el.innerHTML="";
     TOKENS.forEach((t,i)=> el.add(new Option(t.sym,i)));
   });
-  $("tokenA").value=1; // WETH
-  $("tokenB").value=2; // USDC
+  $("tokenA").value=1;
+  $("tokenB").value=2;
 }
 initTokens();
 
 /* ===== Wallet ===== */
 async function ensureProvider(){
-  if(!window.ethereum) throw new Error("MetaMask belum tersedia");
-  if(!provider) provider=new ethers.providers.Web3Provider(window.ethereum,"any");
+  if(window.ethereum){
+    if(!provider){
+      provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    }
+    return;
+  }
+
+  await new Promise((resolve, reject)=>{
+    let tries = 0;
+    const iv = setInterval(()=>{
+      if(window.ethereum){
+        clearInterval(iv);
+        provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        resolve();
+      }
+      if(++tries > 20){
+        clearInterval(iv);
+        reject(new Error("MetaMask belum tersedia"));
+      }
+    }, 100);
+  });
 }
+
 async function connect(){
   try{
     await ensureProvider();
@@ -144,7 +173,7 @@ async function connect(){
     $("btnConnect").textContent=me.slice(0,6)+"…"+me.slice(-4);
     log(`✅ Connected: ${me} (chain ${CHAIN.id})`);
     startAutoBalances();
-    estimateOut(); // first estimate if any
+    estimateOut();
   }catch(e){ log("❌ Connect error: "+(e.message||e)); }
 }
 
@@ -188,7 +217,22 @@ function buildPath(a,b){
   return [src, dst];
 }
 
-/* ===== Estimasi getAmountsOut ===== */
+/* ===== 🔵 DETEKSI POOL V3 (ADDON) ===== */
+async function detectV3Fee(tokenIn, tokenOut){
+  try{
+    if(!provider) return null;
+    const factory = new ethers.Contract(V3_FACTORY, V3_FACTORY_ABI, provider);
+    for(const fee of V3_FEES){
+      const pool = await factory.getPool(tokenIn, tokenOut, fee);
+      if(pool && pool !== ethers.constants.AddressZero){
+        return fee;
+      }
+    }
+  }catch{}
+  return null;
+}
+
+/* ===== Estimasi getAmountsOut (V3 → V2) ===== */
 async function estimateOut(){
   try{
     if(!provider) return;
@@ -201,11 +245,31 @@ async function estimateOut(){
     const path=buildPath();
     const amountIn=toUnits(amtIn, ta.dec);
 
+    /* 🔵 COBA V3 DULU */
+    const v3Fee = await detectV3Fee(path[0], path[path.length-1]);
+    if(v3Fee){
+      try{
+        const quoter = new ethers.Contract(V3_QUOTER, V3_QUOTER_ABI, provider);
+        const out = await quoter.quoteExactInputSingle(
+          path[0],
+          path[path.length-1],
+          v3Fee,
+          amountIn,
+          0
+        );
+        const outHuman = fromUnits(out, tb.dec);
+        $("amtB").value = tb.dec>6 ? outHuman.toFixed(6) : outHuman.toFixed(tb.dec);
+        const rate = outHuman/amtIn;
+        $("rateText").textContent = `V3 (${v3Fee}) • 1 ${ta.sym} ≈ ${rate.toFixed(6)} ${tb.sym}`;
+        return;
+      }catch{}
+    }
+
+    /* ⬇️ FALLBACK V2 (ASLI, TIDAK DIUBAH) */
     const amounts = await router.getAmountsOut(amountIn, path);
     const out = amounts[amounts.length-1];
     const outHuman = fromUnits(out, tb.dec);
     $("amtB").value = tb.dec>6 ? outHuman.toFixed(6) : outHuman.toFixed(tb.dec);
-
     const rate = outHuman/amtIn;
     $("rateText").textContent = `1 ${ta.sym} ≈ ${rate.toFixed(6)} ${tb.sym}`;
   }catch(e){
@@ -232,7 +296,7 @@ async function ensureAllowance(tokenAddr, owner, spender, needed){
   log(`✅ Approve success`);
 }
 
-/* ===== Swap ===== */
+/* ===== Swap (ASLI, TIDAK DIUBAH) ===== */
 $("btnSwap").onclick = async ()=>{
   try{
     await ensureProvider();
@@ -248,21 +312,18 @@ $("btnSwap").onclick = async ()=>{
     if(!amountInStr || Number(amountInStr)<=0) throw new Error("Isi jumlah input yang valid.");
     const amountIn = toUnits(amountInStr, ta.dec);
 
-    const sl = Math.max(0, Math.min(100, parseFloat($("slippage").value)||0.5)); // %
-    const dl = Math.max(1, parseInt($("deadline").value)||20); // menit
+    const sl = Math.max(0, Math.min(100, parseFloat($("slippage").value)||0.5));
+    const dl = Math.max(1, parseInt($("deadline").value)||20);
     const deadlineTs = Math.floor(Date.now()/1000) + dl*60;
 
     const router=new ethers.Contract(ROUTER,ROUTER_ABI,signer);
     const path=buildPath();
 
-    // Estimasi untuk minOut
     const amounts = await router.getAmountsOut(amountIn, path);
     const amountOut = amounts[amounts.length-1];
     const amountOutMin = amountOut.mul(ethers.BigNumber.from(10000 - Math.floor(sl*100))).div(10000);
 
-    // Mode swap berdasarkan ETH/WETH
     if(ta.addr==="ETH_NATIVE"){
-      // swapExactETHForTokens
       log("🚀 swapExactETHForTokens...");
       const tx = await router.swapExactETHForTokens(
         amountOutMin,
@@ -275,7 +336,6 @@ $("btnSwap").onclick = async ()=>{
       const rc=await tx.wait();
       log(`✅ Swap success. Block ${rc.blockNumber} • ${CHAIN.explorer}/tx/${tx.hash}`);
     } else if(tb.addr==="ETH_NATIVE"){
-      // swapExactTokensForETH
       await ensureAllowance(ta.addr, me, ROUTER, amountIn);
       log("🚀 swapExactTokensForETH...");
       const tx = await router.swapExactTokensForETH(
@@ -290,7 +350,6 @@ $("btnSwap").onclick = async ()=>{
       const rc=await tx.wait();
       log(`✅ Swap success. Block ${rc.blockNumber} • ${CHAIN.explorer}/tx/${tx.hash}`);
     } else {
-      // swapExactTokensForTokens
       await ensureAllowance(ta.addr, me, ROUTER, amountIn);
       log("🚀 swapExactTokensForTokens...");
       const tx = await router.swapExactTokensForTokens(
@@ -306,9 +365,7 @@ $("btnSwap").onclick = async ()=>{
       log(`✅ Swap success. Block ${rc.blockNumber} • ${CHAIN.explorer}/tx/${tx.hash}`);
     }
 
-    // refresh saldo
     await refreshBalances();
-    // refresh estimasi
     await estimateOut();
   }catch(e){
     log("❌ Swap error: "+(e.data?.message || e.reason || e.message || e));
